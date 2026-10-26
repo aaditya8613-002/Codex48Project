@@ -1,0 +1,36 @@
+{
+  "note": "30 items for the imaginary company Northwind Labs / FlowDesk. 'expect' lists the rule ids a correct reviewer must raise; an empty list means the item is clean and any finding is a false alarm.",
+  "items": [
+    {"id": 1,  "text": "the tool helps your team plan work in one place.", "expect": ["terminology:the-tool"]},
+    {"id": 2,  "text": "Meet Flow Desk, the calm way to plan.", "expect": ["product-name:flowdesk"]},
+    {"id": 3,  "text": "Flowdesk now supports recurring tasks.", "expect": ["product-name:flowdesk"]},
+    {"id": 4,  "text": "flow-desk makes every handoff simple.", "expect": ["product-name:flowdesk"]},
+    {"id": 5,  "text": "FLOWDESK is here.", "expect": ["product-name:flowdesk"]},
+    {"id": 6,  "text": "Thousands of customers rely on FlowDesk every day.", "expect": ["terminology:customers"]},
+    {"id": 7,  "text": "Success is guaranteed when you plan with FlowDesk.", "expect": ["banned_phrase:guaranteed"]},
+    {"id": 8,  "text": "FlowDesk is 100% secure for every team.", "expect": ["banned_phrase:100-secure"]},
+    {"id": 9,  "text": "A revolutionary way to run projects.", "expect": ["banned_phrase:revolutionary"]},
+    {"id": 10, "text": "Plans are cheap, so every team can start today.", "expect": ["banned_phrase:cheap"]},
+    {"id": 11, "text": "Used by over 5 million teams worldwide.", "expect": ["claim:customer_teams"]},
+    {"id": 12, "text": "FlowDesk delivered 99.99% uptime this year.", "expect": ["claim:uptime"]},
+    {"id": 13, "text": "FlowDesk plans start at $9 per user per month.", "expect": ["claim:price_start"]},
+    {"id": 14, "text": "Northwind Labs was founded in 2015.", "expect": ["claim:founded"]},
+    {"id": 15, "text": "FlowDesk is available in 60 countries.", "expect": ["claim:countries"]},
+    {"id": 16, "text": "FlowDesk is the best project tool on the market.", "expect": ["claim:unverified"]},
+    {"id": 17, "text": "<img src=\"hero.png\"> Meet FlowDesk.", "expect": ["alt-text:missing"]},
+    {"id": 18, "text": "![](banner.png) FlowDesk planning board", "expect": ["alt-text:missing"]},
+    {"id": 19, "text": "<p style=\"color:#cccccc;background:#ffffff\">FlowDesk updates</p>", "expect": ["contrast:wcag-aa"]},
+    {"id": 20, "text": "Used by over 5 million customers, guaranteed.", "expect": ["claim:customer_teams", "terminology:customers", "banned_phrase:guaranteed"]},
+
+    {"id": 21, "text": "FlowDesk helps teams plan work in one place.", "expect": []},
+    {"id": 22, "text": "More than 3 million teams use FlowDesk.", "expect": []},
+    {"id": 23, "text": "FlowDesk plans start at $12 per user per month.", "expect": []},
+    {"id": 24, "text": "We had 99.9% uptime over the last 12 months.", "expect": []},
+    {"id": 25, "text": "Northwind Labs was founded in 2019.", "expect": []},
+    {"id": 26, "text": "FlowDesk is available in 40 countries and is SOC 2 Type II certified.", "expect": []},
+    {"id": 27, "text": "<img src=\"team.jpg\" alt=\"Two colleagues review a timeline on a laptop\"> FlowDesk in action.", "expect": []},
+    {"id": 28, "text": "<p style=\"color:#222222;background:#ffffff\">FlowDesk updates</p>", "expect": []},
+    {"id": 29, "text": "Our 2026 roadmap focuses on calmer planning.", "expect": []},
+    {"id": 30, "text": "Join the FlowDesk webinar on 12 November at 10 am.", "expect": []}
+  ]
+}

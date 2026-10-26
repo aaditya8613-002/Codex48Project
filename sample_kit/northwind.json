@@ -1,0 +1,159 @@
+{
+  "organisation": {
+    "name": "Northwind Labs (imaginary company, sample data only)",
+    "product_names": [
+      "FlowDesk"
+    ],
+    "palette": [
+      "#1F4E79",
+      "#F2A900",
+      "#FFFFFF",
+      "#222222"
+    ]
+  },
+  "terms": [
+    {
+      "kind": "terminology",
+      "phrase": "the tool",
+      "preferred": "FlowDesk",
+      "reason": "Always name the product: say \"FlowDesk\", not \"the tool\".",
+      "severity": "medium"
+    },
+    {
+      "kind": "terminology",
+      "phrase": "customers",
+      "preferred": "teams",
+      "reason": "We say \"teams\" for organisations using FlowDesk.",
+      "severity": "low"
+    },
+    {
+      "kind": "terminology",
+      "phrase": "Northwind Labs Inc",
+      "preferred": "Northwind Labs",
+      "reason": "The company name has no legal suffix in marketing copy.",
+      "severity": "low"
+    },
+    {
+      "kind": "banned_phrase",
+      "phrase": "guaranteed",
+      "preferred": null,
+      "reason": "We never promise outcomes: avoid \"guaranteed\".",
+      "severity": "high"
+    },
+    {
+      "kind": "banned_phrase",
+      "phrase": "100% secure",
+      "preferred": "built with strong security controls",
+      "reason": "No absolute security claims.",
+      "severity": "high"
+    },
+    {
+      "kind": "banned_phrase",
+      "phrase": "revolutionary",
+      "preferred": null,
+      "reason": "Avoid hype words such as \"revolutionary\".",
+      "severity": "medium"
+    },
+    {
+      "kind": "banned_phrase",
+      "phrase": "cheap",
+      "preferred": "affordable",
+      "reason": "Position on value: say \"affordable\", never \"cheap\".",
+      "severity": "medium"
+    },
+    {
+      "kind": "banned_phrase",
+      "phrase": "killer feature",
+      "preferred": "standout feature",
+      "reason": "Avoid violent metaphors.",
+      "severity": "low"
+    }
+  ],
+  "facts": [
+    {
+      "key": "customer_teams",
+      "statement": "More than 3 million teams use FlowDesk.",
+      "value": 3000000,
+      "unit": "",
+      "keywords": [
+        "teams",
+        "customers",
+        "companies"
+      ],
+      "source": "Fact sheet v3",
+      "valid_from": "2026-01-01",
+      "valid_to": null
+    },
+    {
+      "key": "uptime",
+      "statement": "FlowDesk had 99.9% uptime over the last 12 months.",
+      "value": 99.9,
+      "unit": "%",
+      "keywords": [
+        "uptime"
+      ],
+      "source": "Status report Q3 2026",
+      "valid_from": "2026-07-01",
+      "valid_to": null
+    },
+    {
+      "key": "founded",
+      "statement": "Northwind Labs was founded in 2019.",
+      "value": 2019,
+      "unit": "",
+      "keywords": [
+        "founded"
+      ],
+      "source": "Company profile",
+      "valid_from": "2019-01-01",
+      "valid_to": null
+    },
+    {
+      "key": "price_start",
+      "statement": "FlowDesk plans start at $12 per user per month.",
+      "value": 12,
+      "unit": "usd",
+      "keywords": [
+        "per user",
+        "starts at",
+        "starting at",
+        "plans start"
+      ],
+      "source": "Pricing page, Oct 2026",
+      "valid_from": "2026-10-01",
+      "valid_to": null
+    },
+    {
+      "key": "countries",
+      "statement": "FlowDesk is available in 40 countries.",
+      "value": 40,
+      "unit": "",
+      "keywords": [
+        "countries"
+      ],
+      "source": "Fact sheet v3",
+      "valid_from": "2026-01-01",
+      "valid_to": null
+    },
+    {
+      "key": "soc2",
+      "statement": "FlowDesk is SOC 2 Type II certified.",
+      "value": null,
+      "unit": "",
+      "keywords": [
+        "soc 2",
+        "soc2"
+      ],
+      "source": "Audit letter 2026",
+      "valid_from": "2026-03-01",
+      "valid_to": null
+    }
+  ],
+  "documents": [
+    {
+      "title": "Northwind Brand Guidelines",
+      "kind": "guideline",
+      "file": "brand_guidelines.md"
+    }
+  ]
+}
