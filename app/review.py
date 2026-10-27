@@ -12,7 +12,7 @@ from .ai.grounded_review import adjudicate_claims, review_with_passages
 from .claims import ClaimResult, FactRef, check_claims, to_findings
 from .config import settings
 from .kb.retrieval import retrieve
-from .models import Fact, FindingRow, Organisation, Review, Term
+from .models import ApprovalAudit, Fact, FindingRow, Organisation, Review, ReviewRevision, Term
 from .rules import alt_text, contrast, palette, terms
 from .types import Finding
 
@@ -78,6 +78,8 @@ def run_review(
     user_id: int | None = None,
     persist: bool = True,
     today: date | None = None,
+    title: str = "Untitled Draft",
+    creator_name: str = "Maya (Content Creator)",
 ) -> dict:
     if not text or not text.strip():
         raise ValueError("Content is empty.")
@@ -125,7 +127,19 @@ def run_review(
     }
 
     if persist:
-        review = Review(org_id=org_id, user_id=user_id, channel=channel, content=text, ai_used=ai_used, ai_error=ai_error)
+        review = Review(
+            org_id=org_id,
+            user_id=user_id,
+            title=title or "Untitled Draft",
+            channel=channel or "General",
+            status="draft",
+            creator_name=creator_name or "Maya (Content Creator)",
+            assigned_reviewer="Jordan (Brand Manager)",
+            content=text,
+            version=1,
+            ai_used=ai_used,
+            ai_error=ai_error,
+        )
         for f in findings:
             review.findings.append(
                 FindingRow(
@@ -134,9 +148,28 @@ def run_review(
                     start=f.start, end=f.end, evidence=f.evidence,
                 )
             )
+        review.revisions.append(
+            ReviewRevision(
+                version_number=1,
+                content=text,
+                change_summary="Initial draft created",
+                created_by=creator_name or "Maya (Content Creator)",
+            )
+        )
+        review.audit_logs.append(
+            ApprovalAudit(
+                action="created",
+                actor_name=creator_name or "Maya (Content Creator)",
+                actor_role="creator",
+                notes="Initial scan and review created",
+            )
+        )
         session.add(review)
         session.commit()
         result["review_id"] = review.id
+        result["status"] = review.status
+        result["title"] = review.title
+        result["version"] = review.version
         for payload, row in zip(result["findings"], review.findings):
             payload["id"] = row.id
     return result
