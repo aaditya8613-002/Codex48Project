@@ -106,13 +106,64 @@ class Review(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     org_id: Mapped[int] = mapped_column(ForeignKey("organisations.id"), index=True)
     user_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"), nullable=True)
-    channel: Mapped[str] = mapped_column(String(100), default="")  # "LinkedIn post"
+    title: Mapped[str] = mapped_column(String(300), default="Untitled Content")
+    channel: Mapped[str] = mapped_column(String(100), default="General")  # "LinkedIn post", "Blog", etc.
+    status: Mapped[str] = mapped_column(String(30), default="draft")  # draft | in_review | changes_requested | approved | published
+    creator_name: Mapped[str] = mapped_column(String(100), default="Maya (Content Creator)")
+    assigned_reviewer: Mapped[str] = mapped_column(String(100), default="Jordan (Brand Manager)")
     content: Mapped[str] = mapped_column(Text)
+    version: Mapped[int] = mapped_column(Integer, default=1)
     ai_used: Mapped[bool] = mapped_column(Boolean, default=False)
     ai_error: Mapped[str] = mapped_column(String(500), default="")
     created_at: Mapped[datetime] = mapped_column(DateTime, default=_now)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=_now)
 
     findings: Mapped[list["FindingRow"]] = relationship(back_populates="review", cascade="all, delete-orphan")
+    revisions: Mapped[list["ReviewRevision"]] = relationship(back_populates="review", cascade="all, delete-orphan", order_by="ReviewRevision.version_number")
+    comments: Mapped[list["Comment"]] = relationship(back_populates="review", cascade="all, delete-orphan", order_by="Comment.created_at")
+    audit_logs: Mapped[list["ApprovalAudit"]] = relationship(back_populates="review", cascade="all, delete-orphan", order_by="ApprovalAudit.created_at")
+
+
+class ReviewRevision(Base):
+    __tablename__ = "review_revisions"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    review_id: Mapped[int] = mapped_column(ForeignKey("reviews.id"), index=True)
+    version_number: Mapped[int] = mapped_column(Integer, default=1)
+    content: Mapped[str] = mapped_column(Text)
+    change_summary: Mapped[str] = mapped_column(String(500), default="")
+    created_by: Mapped[str] = mapped_column(String(100), default="Creator")
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=_now)
+
+    review: Mapped[Review] = relationship(back_populates="revisions")
+
+
+class Comment(Base):
+    __tablename__ = "review_comments"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    review_id: Mapped[int] = mapped_column(ForeignKey("reviews.id"), index=True)
+    finding_id: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    user_name: Mapped[str] = mapped_column(String(100))
+    user_role: Mapped[str] = mapped_column(String(50))  # creator | manager | reviewer | admin
+    message: Mapped[str] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=_now)
+
+    review: Mapped[Review] = relationship(back_populates="comments")
+
+
+class ApprovalAudit(Base):
+    __tablename__ = "approval_audits"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    review_id: Mapped[int] = mapped_column(ForeignKey("reviews.id"), index=True)
+    action: Mapped[str] = mapped_column(String(50))  # created | submitted | changes_requested | approved | published | reopened
+    actor_name: Mapped[str] = mapped_column(String(100))
+    actor_role: Mapped[str] = mapped_column(String(50))
+    notes: Mapped[str] = mapped_column(Text, default="")
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=_now)
+
+    review: Mapped[Review] = relationship(back_populates="audit_logs")
 
 
 class FindingRow(Base):
@@ -135,7 +186,8 @@ class FindingRow(Base):
     # Creator decision: open | accepted | dismissed
     status: Mapped[str] = mapped_column(String(12), default="open")
     dismiss_reason: Mapped[str] = mapped_column(String(500), default="")
-    incorrect_finding: Mapped[bool] = mapped_column(Boolean, default=False)  # "incorrect finding" button
+    incorrect_finding: Mapped[bool] = mapped_column(Boolean, default=False)  # the "incorrect finding" button
     decided_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
 
     review: Mapped[Review] = relationship(back_populates="findings")
+

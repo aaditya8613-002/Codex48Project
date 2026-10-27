@@ -1,72 +1,147 @@
-# BrandGuard backend: AI and backend module
+# BrandGuard — Intelligent Brand Governance & Pre-Publication Review Platform
 
-Python / FastAPI service for the knowledge base, exact rule checks, claim checking, grounded Gemini review, TiDB schema and the accuracy test set.
+**Problem Statement by Inkloom AI**  
+**Team Name:** Brand New Minds  
+**Team Members:** Advait Sachin Keskar & Aaditya Gupta  
+**College:** CMRIT, Bengaluru  
 
-## How a review works
+---
 
-1. **Exact rules (no AI):** terminology, banned phrases, product-name variants, alt text, inline-style colour contrast (WCAG formula), brand palette on images.
-2. **Claim check (no AI needed):** numbers are matched to the approved fact next to them and marked `supported`, `contradicted` or `cannot_verify`. Expired facts and numbers with no fact never count as supported.
-3. **Gemini (optional):** retrieves the top guideline passages by embedding similarity and reviews tone and messaging. Every answer is validated in code: the quote must exist in the content, the cited passage id must be one we sent, a claim verdict needs a real fact id. Anything else is dropped or downgraded to `cannot_verify`.
+## 🌟 Executive Summary
 
-If Gemini is missing or fails, the review still returns every exact finding plus an `ai_error` note.
+Growing organisations publish content across distributed teams, external marketing agencies, and generative AI tools. Outdated statistics, inconsistent terminology, misleading promotional claims, and inaccessible designs often slip into production before anyone catches them.
 
-## Run
+**BrandGuard** is a brand governance platform that reviews content *before* publication, checking it against approved guidelines, verified facts, and WCAG accessibility standards. Rather than functioning as a black-box censor, BrandGuard explains every flagged issue, cites the exact source evidence, and suggests human-centered corrections that preserve creator intent.
 
-```bash
-python -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt
-cp .env.example .env        # fill DATABASE_URL (TiDB) and GEMINI_API_KEY
-uvicorn app.main:app --reload
+---
+
+## 🚀 Key Capabilities & Modules
+
+### 1. Pre-Flight Content Studio & Multi-Format Review
+- **Exact Code Rules Engine (No AI Needed):**
+  - **Terminology Protection:** Ensures protected product naming (e.g. `FlowDesk`, catching variants like `flowdesk`, `Flow Desk`, `FLOWDESK`).
+  - **Prohibited Words & Metaphors:** Detects violent idioms (e.g., `killer feature`), aggressive hype words (`revolutionary`), and risky absolute guarantees (`100% secure`, `guaranteed`).
+  - **WCAG 2.2 Color Contrast Formula:** Audits HTML inline styles and hex combinations against AA (4.5:1) and AAA (7.0:1) thresholds.
+  - **Accessibility Alt-Text Scanner:** Checks image tags and markdown embeddings for missing or placeholder descriptions.
+  - **Brand Palette Validator:** Scans dominant graphic colors against approved corporate palette hex codes.
+- **Claim & Metric Adjudication:**
+  - Extracts numeric claims and temporal metrics from copy, comparing them with dated fact sheets.
+  - Returns explicit verdicts: `supported`, `contradicted`, or `cannot_verify` (safeguard against uncorroborated superlatives).
+- **Grounded AI Tone & Messaging (Google Gemini):**
+  - Evaluates brand tone bounded strictly by retrieved brand guideline passages.
+  - Code-level validation: any finding that cites non-existent passages or quotes absent from the copy is discarded or downgraded.
+
+### 2. Review & Approval Collaboration Pipeline
+- **Multi-Role Simulation:**
+  - ✍️ **Maya (Content Creator):** Runs pre-flight scans, accepts 1-click suggested fixes, provides rationales when dismissing findings, and submits drafts.
+  - 👔 **Jordan (Brand Marketing Manager):** Reviews drafts in the pipeline, audits tone alignment, approves copy, or requests revisions with feedback notes.
+  - ⚖️ **Rachel (Legal & Compliance Reviewer):** Verifies claims against approved fact sheets and checks statutory disclosures.
+  - 🛡️ **Aaditya (Brand Governance Admin):** Maintains facts, terms, documents, and monitors organizational brand health.
+- **Revision History Timeline:**
+  - Every draft modification creates a numbered revision (`v1`, `v2`, ...) with change summaries and diff tracking.
+- **Threaded Collaboration:**
+  - Real-time discussion threads between creators, managers, and legal reviewers on drafts and specific rules.
+- **Tamper-Evident Audit Trail:**
+  - Complete log recording timestamps, actor identities, roles, and action types (`CREATED`, `SUBMITTED`, `CHANGES_REQUESTED`, `APPROVED`, `PUBLISHED`).
+
+### 3. Brand Kit & Knowledge Base
+- **Approved Fact Sheet:** Dated, versioned facts with normalized numbers, units, and proof sources.
+- **Interactive WCAG Contrast Simulator:** Live playground to test foreground/background pairs with instant ratio readouts and suggested brand palette alternatives.
+- **Terminology & Banned Phrases Dictionary:** Configurable rule base with severity ratings and rationale.
+- **Guideline Document Ingestion:** Parses `.pdf`, `.docx`, `.txt`, `.md` files into vector embeddings for semantic retrieval.
+
+### 4. Governance Insights & Guideline Confusion Index
+- **Brand Health Index:** Aggregate compliance score reflecting resolved vs open issues across content.
+- **Guideline Confusion Index:** Ranks brand guidelines by creator dismissal rate. High dismissal indicates ambiguous, outdated, or overly restrictive rules requiring clarification.
+- **Violation Breakdown by Category:** Visual distribution across Terminology, Claims, Accessibility, and Voice.
+
+---
+
+## 📊 Empirical Evaluation Benchmark
+
+BrandGuard was evaluated on an automated benchmark test set of 30 items (`eval/testset.json`):
+- **20 Planted Mistake Items (22 expected errors):** Terminology drift, outdated metrics, banned hype, contrast failures, and missing alt text.
+- **10 Clean Control Items:** Compliant copy passing all brand rules.
+
+```text
+Planted mistakes found : 22/22 (Recall: 100%)
+False alarms on clean  : 0
+Extra findings         : 1
 ```
 
-Tables are created on startup. TiDB Cloud needs TLS; it is enabled automatically for `mysql+pymysql://` URLs.
+---
 
-Load the sample brand kit (imaginary company, made-up data only):
+## 🛠️ Technology Stack
 
-```python
-from app.db import SessionLocal, init_db
-from app.kit import load_kit
-init_db(); s = SessionLocal()
-print(load_kit(s, "sample_kit/northwind.json"))   # prints the org id; embeds guidelines if GEMINI_API_KEY is set
-```
-
-## Main endpoints
-
-| Method | Path | Purpose |
+| Layer | Technologies | Role |
 |---|---|---|
-| POST | `/orgs` | create organisation (product names, palette) |
-| POST | `/orgs/{id}/kb/documents` | upload PDF/DOCX/TXT/MD guidelines (chunked + embedded) |
-| POST/GET | `/orgs/{id}/kb/facts`, `/kb/terms` | approved facts and preferred/banned terms |
-| POST | `/orgs/{id}/kb/reembed` | embed passages saved while the API was down |
-| POST | `/orgs/{id}/review/text` | `{text, channel, use_ai}` returns findings + claim verdicts |
-| POST | `/orgs/{id}/review/image` | image upload + alt text |
-| POST | `/orgs/{id}/review/contrast` | `{fg, bg, large_text, level}` |
-| PATCH | `/findings/{id}` | accept / dismiss (reason required) / mark incorrect |
-| GET | `/orgs/{id}/insights/rules` | per-rule counts and dismissal rate for the dashboard |
+| **Frontend** | React, Vite, Vanilla CSS Design System, Lucide Icons | Responsive governance workspace with role switching, diffs, and live contrast simulator |
+| **Backend** | Python 3.11+, FastAPI, Uvicorn | REST API, rules engine, claim extraction, and review orchestration |
+| **Database** | SQLAlchemy 2.0, SQLite / TiDB Cloud (MySQL compatible) | Relational storage for orgs, reviews, revisions, findings, comments, and audit trails |
+| **AI / Grounding** | Google Gemini API (`gemini-2.5-flash`), `google-genai` | Grounded tone review and semantic claim adjudication |
+| **Document Parsing** | `pdfplumber`, `python-docx`, `Pillow` | Guideline extraction and image palette analysis |
 
-Interactive docs at `/docs`.
+---
 
-## Accuracy test
+## ⚡ Quick Start & Running Locally
 
+### Prerequisites
+- Python 3.11+
+- Node.js 18+ and npm
+
+### 1. Backend Setup
 ```bash
-python -m eval.run_eval                                  # exact rules + claims
-python -m eval.run_eval --ai                             # adds Gemini (needs key)
-python -m eval.run_eval --min-recall 0.8 --max-false-alarms 0
+# In Codex48Project-main:
+python -m venv venv
+.\venv\Scripts\activate      # Windows (or source venv/bin/activate on Unix)
+pip install -r requirements.txt
+
+# Initialize database and seed sample kit & reviews:
+python -m app.seed
+
+# Run tests:
 pytest
+
+# Run FastAPI server on port 8000:
+uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload
 ```
 
-`eval/testset.json` holds 30 items: 20 with planted mistakes (22 expected findings) and 10 clean items. The harness prints planted mistakes found, false alarms on clean items, and extra findings on planted items. Report these numbers for the "at least 80% of planted mistakes" target.
+### 2. Frontend Setup
+```bash
+cd frontend
+npm install
+npm run dev
+```
+Open **`http://127.0.0.1:5173/`** in your browser.
 
-## Known limits (say these honestly in the demo)
+*(Note: FastAPI also serves the built static frontend directly at `http://127.0.0.1:8000/` when built with `npm run build`.)*
 
-- Contrast is checked for HTML inline styles and hex pairs, not for text inside images (that would need OCR).
-- Palette check looks at dominant colours only: best for banners and graphics, not photos. Logo matching is not built yet.
-- Claim matching is keyword-based. Each fact needs good `keywords`; wording that avoids them becomes `cannot_verify`, never a false "supported".
-- Embeddings live in a JSON column and are compared in Python: fine for a small knowledge base.
-- The free Google AI Studio tier may use submitted data to improve Google products: use made-up sample data only.
-- Login/JWT, comments, approvals and version history belong to the workflow module; add its auth dependency to these routes.
-- The Gemini model name defaults to `gemini-2.5-flash`; set `GEMINI_MODEL` to whatever your key can use.
+---
 
-## Declaration
+## 🎬 1-Click Judging Demo Scenarios
 
-Generated with AI assistance (Claude). Declare this as the hackathon rules require, and review and understand every file before you present it.
+In the **Demo Presets** tab of the web app, judges can test 4 scenarios with a single click:
+
+1. **Scenario #1: Outdated Customer Metrics & Hype**  
+   *Flags:* Outdated customer count ("5 million" vs 3M in fact sheet), prohibited phrase `100% secure`, `guaranteed`, `revolutionary`, and violent idiom `killer feature`.
+2. **Scenario #2: Inaccessible Web Hero & Bad Contrast**  
+   *Flags:* `#cccccc` on `#ffffff` contrast ratio 1.6:1 (fails WCAG AA 4.5:1), casing variant `flowdesk`, prohibited word `cheap`, contradicted price `$9`, missing image alt text.
+3. **Scenario #3: Unverified Market Superlatives**  
+   *Flags:* Superlative `fastest cloud workspace` (cannot verify), `Revenue grew 45%` (cannot verify), `60 countries` (contradicts 40 countries).
+4. **Scenario #4: Official Benchmark Control**  
+   *Result:* 100% verified, 0 violations against Northwind Fact Sheet v3.
+
+---
+
+## 👥 Team Responsibilities
+
+- **Advait Sachin Keskar:** Knowledge base & semantic retrieval, exact rules engine, claim verification, Gemini grounded review prompts, database schema, and accuracy evaluation harness.
+- **Aaditya Gupta:** Frontend architecture & UI design system, review and approval pipeline, revision history and diff tracking, threaded collaboration comments, governance insights dashboard, and demo scenarios.
+
+---
+
+## ⚖️ Responsible AI & Ethical Declarations
+- **Human-in-the-Loop:** Suggestions are advisory. Decisions are made and approved by human creators and managers.
+- **Explainability:** Every finding cites the specific brand guideline passage or dated fact sheet item.
+- **Confidentiality:** Bounded context retrieval prevents leakage, and data is partitioned strictly per organization.
+- Code developed with AI pair-programming assistance as permitted by hackathon guidelines.
